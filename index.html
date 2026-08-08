@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ahoy by Honey &amp; Abhijeet</title>
 <link rel="icon" type="image/png" href="favicon-32.png">
-<link rel="apple-touch-icon" href="logo.png">
+<link rel="apple-touch-icon" href="Logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,450;0,9..144,600;1,9..144,450&family=Allura&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -747,7 +747,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
 <div id="logoRevealScreen">
   <button id="startRevealBtn" class="start-btn">Click to Enter</button>
   <video id="logoRevealVideo" playsinline preload="auto">
-    <source src="logo-reveal.mp4" type="video/mp4">
+    <source src="Logo-Reveal.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 </div>
@@ -770,7 +770,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
 
 <!-- ============ HERO ============ -->
 <section class="hero" id="top">
-  <img class="hero-seal" src="logo.png" alt="" aria-hidden="true">
+  <img class="hero-seal" src="Logo.png" alt="" aria-hidden="true">
   <div class="eyebrow">Together with their family</div>
   <h1>Honey <em>&amp;</em> Abhijeet</h1>
   <p class="hero-sub">request the joy of your company across three celebrations</p>
@@ -802,7 +802,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
 <!-- ============ COUPLE ============ -->
 <section class="section-pad couple" id="couple">
   <div class="wrap">
-    <div class="seal-divider reveal" style="margin-bottom:70px;"><span class="line"></span><img src="logo.png" alt=""><span class="line"></span></div>
+    <div class="seal-divider reveal" style="margin-bottom:70px;"><span class="line"></span><img src="Logo.png" alt=""><span class="line"></span></div>
     <div class="couple-grid">
       <div class="couple-card reveal">
         <h3>Meet the Bride</h3>
@@ -987,8 +987,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
       <h2 style="font-size:clamp(28px,4vw,40px); margin:12px 0 6px;">Let Us Know</h2>
     </div>
 
-   <form id="rsvpForm" class="reveal" name="rsvp" method="POST" netlify data-netlify="true">
-  	<input type="hidden" name="form-name" value="rsvp">
+   <form id="rsvpForm" class="reveal">
 
       <!-- Step 1: Name & Initial Question -->
       <div class="field">
@@ -1049,7 +1048,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
       </div>
     </form>
 
-    <div class="rsvp-seal-overlay" id="rsvpSealOverlay"><img src="logo.png" alt="Sealed"></div>
+    <div class="rsvp-seal-overlay" id="rsvpSealOverlay"><img src="Logo.png" alt="Sealed"></div>
 
     <div class="rsvp-thanks" id="rsvpThanks">
       <h3 class="serif" id="thanksTitle">Thank you!</h3>
@@ -1138,7 +1137,7 @@ function setupPillGroups() {
 setupPillGroups();
 
 
-/* ============ NETLIFY RSVP SUBMIT ============ */
+/* ============ GOOGLE FORMS RSVP SUBMIT ============ */
 const rsvpForm = document.getElementById('rsvpForm');
 if (rsvpForm) {
   rsvpForm.addEventListener('submit', function(e) {
@@ -1150,46 +1149,70 @@ if (rsvpForm) {
       return [...group.querySelectorAll('.pill.selected')].map(p => p.dataset.value);
     };
 
-    const formData = new FormData(rsvpForm);
-    formData.set('form-name', 'rsvp');
-    formData.set('attendance', selectedValues('attendance')[0] || (isAttending ? 'Yes, with pleasure!' : 'Regretfully, no'));
+    const payload = new FormData();
+
+    // 1. Name
+    payload.append(CONFIG.rsvp.entries.name, rsvpForm.name.value);
+
+    // 2. Attendance
+    const attendanceChoice = selectedValues('attendance')[0] || (isAttending ? 'Yes, with pleasure!' : 'Regretfully, no');
+    payload.append(CONFIG.rsvp.entries.attendance, attendanceChoice);
 
     if (isAttending) {
-      formData.set('events', selectedValues('events').join(', '));
-      formData.set('guest', selectedValues('guest')[0] || 'No');
+      if (rsvpForm.email && rsvpForm.email.value) payload.append(CONFIG.rsvp.entries.email, rsvpForm.email.value);
+      if (rsvpForm.phone && rsvpForm.phone.value) payload.append(CONFIG.rsvp.entries.phone, rsvpForm.phone.value);
+
+      const events = selectedValues('events');
+      events.forEach(v => payload.append(CONFIG.rsvp.entries.events, v));
+
+      const guestChoice = selectedValues('guest')[0] || 'No';
+      payload.append(CONFIG.rsvp.entries.guest, guestChoice);
+
+      if (rsvpForm.message && rsvpForm.message.value) payload.append(CONFIG.rsvp.entries.message, rsvpForm.message.value);
+    } else {
+      const wishesText = rsvpForm.wishes ? rsvpForm.wishes.value : 'Sent regrets';
+      payload.append(CONFIG.rsvp.entries.wishes, wishesText);
     }
 
-    fetch('/', {
-      method: 'POST',
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(formData).toString()
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Form submission network error');
-      }
-      rsvpForm.style.display = 'none';
-      const overlay = document.getElementById('rsvpSealOverlay');
-      if (overlay) overlay.classList.add('show');
+    // Submit via hidden iframe to bypass CORS
+    const tempForm = document.createElement('form');
+    tempForm.action = CONFIG.rsvp.actionUrl;
+    tempForm.method = 'POST';
+    tempForm.target = 'hidden_iframe';
 
-      if (isAttending && typeof confetti === 'function') {
-        confetti({ particleCount: 70, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors: ['#6d1b24', '#c8a13c', '#f1e4bd', '#134a52'] });
-        confetti({ particleCount: 70, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors: ['#6d1b24', '#c8a13c', '#f1e4bd', '#134a52'] });
-      }
+    for (const [key, value] of payload.entries()) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = value;
+      tempForm.appendChild(input);
+    }
 
-      setTimeout(() => {
-        if (overlay) overlay.classList.remove('show');
-        if (isAttending) {
-          document.getElementById('thanksTitle').textContent = "Thank you!";
-          document.getElementById('thanksSub').textContent = "We've got your RSVP — see you on the dance floor!";
-        } else {
-          document.getElementById('thanksTitle').textContent = "Thank you for your wishes!";
-          document.getElementById('thanksSub').textContent = "We will miss you at the celebrations, but your warm thoughts mean the world to us.";
-        }
-        document.getElementById('rsvpThanks').style.display = 'block';
-      }, 750);
-    })
-    .catch(error => alert('Submission failed. Please check your internet connection and try again.'));
+    document.body.appendChild(tempForm);
+    tempForm.submit();
+    document.body.removeChild(tempForm);
+
+    // UI Response
+    rsvpForm.style.display = 'none';
+    const overlay = document.getElementById('rsvpSealOverlay');
+    if (overlay) overlay.classList.add('show');
+
+    if (isAttending && typeof confetti === 'function') {
+      confetti({ particleCount: 70, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors: ['#6d1b24', '#c8a13c', '#f1e4bd', '#134a52'] });
+      confetti({ particleCount: 70, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors: ['#6d1b24', '#c8a13c', '#f1e4bd', '#134a52'] });
+    }
+
+    setTimeout(() => {
+      if (overlay) overlay.classList.remove('show');
+      if (isAttending) {
+        document.getElementById('thanksTitle').textContent = "Thank you!";
+        document.getElementById('thanksSub').textContent = "We've got your RSVP — see you on the dance floor!";
+      } else {
+        document.getElementById('thanksTitle').textContent = "Thank you for your wishes!";
+        document.getElementById('thanksSub').textContent = "We will miss you at the celebrations, but your warm thoughts mean the world to us.";
+      }
+      document.getElementById('rsvpThanks').style.display = 'block';
+    }, 750);
   });
 }
 
