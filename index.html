@@ -79,7 +79,9 @@ body::after {
 @media (max-width: 600px) {
   body::before,
   body::after {
-    display: none; /* Hides on narrow screens to prevent text overlap */
+    display: block;
+    width: 38px;       /* Narrower width so it sits neatly at the screen edge */
+    opacity: 0.12;      /* Subtle transparency so text remains readable */
   }
 }
 
@@ -214,6 +216,29 @@ nav.scrolled{ border-bottom-color:var(--line); }
   font-weight:400;
 }
 .hero h1 em{ font-style:normal; font-family:var(--serif); font-size:.4em; font-weight:300; color:var(--accent); transition:color .9s ease; padding:0 .1em; vertical-align:middle; }
+
+/* Mobile 3-line stacking for Hero & Farewell names */
+@media (max-width: 640px) {
+  .hero h1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.95;
+  }
+  .hero h1 em {
+    display: block;
+    font-size: 0.5em;
+    padding: 6px 0;
+  }
+  .farewell-sign {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.95;
+    font-size: 48px !important;
+  }
+}
+
 .hero-sub{
   max-width:520px; margin:26px auto 8px; font-size:17px;
 }
@@ -1064,7 +1089,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
   <div class="wrap reveal">
     <p class="farewell-line">Sixteen years brought us here.<br>The years ahead are still unwritten.</p>
     <p class="farewell-sub">Thank you for becoming part of our journey.</p>
-    <div class="farewell-sign">Honey &amp; Abhijeet</div>
+    <div class="farewell-sign"><span>Honey</span> <em>&amp;</em> <span>Abhijeet</span></div>
     <div class="farewell-tag">Boatmates, now and always.</div>
   </div>
 </section>
