@@ -736,6 +736,14 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
   object-fit: cover; /* Ensures video fills screen seamlessly */
 }
 
+/* Ensure full video fits on portrait/mobile screens without cropping */
+@media (max-width: 768px) {
+  #logoRevealVideo {
+    object-fit: contain;
+    background-color: var(--paper); /* Fills top/bottom bars with matching background */
+  }
+}
+
 /* Elegant Tap to Start Button */
 .start-btn {
   position: absolute;
