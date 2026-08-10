@@ -45,10 +45,10 @@ body::after {
   position: fixed;
   top: 0;
   bottom: 0;
-  width: 220px; /* Adjust width as needed */
+  width: 320px; /* Expanded for a rich, noticeable frame on desktop */
   z-index: 1; /* Keeps borders behind text content but visible on background */
   pointer-events: none; /* Ensures buttons and links behind remain clickable */
-  opacity: 0.18; /* Soft watermark transparency so it blends with section colors */
+  opacity: 0.18; /* Increased transparency so line details are clear */
   background-repeat: repeat-y;
   background-size: contain;
   mix-blend-mode: multiply; /* Blends artwork naturally over different section background colors */
@@ -68,20 +68,20 @@ body::after {
   background-position: right top;
 }
 
-/* Hide or scale down on mobile screens so content stays clear */
+/* Tablet & Mobile Scaling */
 @media (max-width: 900px) {
   body::before,
   body::after {
-    width: 100px;
-    opacity: 0.10;
+    width: 90px;
+    opacity: 0.18;
   }
 }
 @media (max-width: 600px) {
   body::before,
   body::after {
     display: block;
-    width: 38px;       /* Narrower width so it sits neatly at the screen edge */
-    opacity: 0.12;      /* Subtle transparency so text remains readable */
+    width: 65px;       /* Expanded width for visible framing on mobile screens */
+    opacity: 0.18;     /* Enhanced visibility while keeping text readable */
   }
 }
 
@@ -767,6 +767,77 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
   pointer-events: none;
 }
 
+
+/* Floating Vinyl Button */
+.vinyl-toggle-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease;
+}
+
+.vinyl-toggle-btn:hover {
+  transform: scale(1.08);
+}
+
+/* Vinyl Disc Styling */
+.vinyl-record {
+  width: 48px;
+  height: 48px;
+  background: #111111;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #333333;
+}
+
+/* Grooves Effect */
+.vinyl-grooves {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+/* Center Label */
+.vinyl-center {
+  width: 16px;
+  height: 16px;
+  background: #c5a059; /* Accent gold color */
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  z-index: 2;
+}
+
+/* Spin Animation */
+@keyframes spinVinyl {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Class applied when audio is active */
+.vinyl-record.is-playing {
+  animation: spinVinyl 3s linear infinite;
+}
+
+
 </style>
 </head>
 <body>
@@ -782,7 +853,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
 <nav id="mainNav">
   <div class="nav-mark">
     <img class="seal-mini" src="seal-72.png" alt="H&A seal" width="26" height="26">
-    H &amp; A
+    Ahoy by Honey &amp; Abhijeet
   </div>
   <ul class="nav-links">
     <li><a href="#welcome">Welcome</a></li>
@@ -811,6 +882,17 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
 
   <div class="scroll-cue"></div>
 </section>
+
+<!-- Background Audio Element -->
+<audio id="bg-music" preload="auto"></audio>
+
+<!-- Floating Vinyl Toggle Button -->
+<button id="vinyl-btn" class="vinyl-toggle-btn" aria-label="Toggle Music">
+  <div class="vinyl-record">
+    <div class="vinyl-grooves"></div>
+    <div class="vinyl-center"></div>
+  </div>
+</button>
 
 <!-- ============ WELCOME ============ -->
 <section class="section-pad welcome" id="welcome">
@@ -1450,6 +1532,7 @@ if (scrapbookStage) {
 
 buildScrapbook();
 
+
 /* ============ Farewell ripple (mouse / touch follows) ============ */
 const rippleLayer = document.getElementById('rippleLayer');
 const farewellSection = document.getElementById('farewell');
@@ -1465,6 +1548,115 @@ if (farewellSection) {
     if(e.touches[0]) moveRipple(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive:true });
 }
+
+/* ============ Venyl Automatic ============ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Self-hosted files directly in the root directory
+  const playlist = [
+    "Lo-Fi.mp3"
+  ];
+
+  const bgMusic = document.getElementById("bg-music");
+  const vinylBtn = document.getElementById("vinyl-btn");
+  const vinylRecord = vinylBtn.querySelector(".vinyl-record");
+  const siteVideos = document.querySelectorAll("video");
+
+  bgMusic.volume = 0.15; // Set soft background volume (15%)
+
+  let hasStartedSequence = false;
+  let userWantsMusic = true;
+  let delayTimer = null;
+  let currentTrackIndex = 0;
+
+  function getRandomTrackIndex() {
+    return Math.floor(Math.random() * playlist.length);
+  }
+
+  function loadTrack(index) {
+    currentTrackIndex = index;
+    // encodeURIComponent handles spaces and commas safely for URL paths
+    bgMusic.src = encodeURIComponent(playlist[currentTrackIndex]);
+    bgMusic.load();
+  }
+
+  function playAudio() {
+    if (!userWantsMusic) return;
+    bgMusic.play().then(() => {
+      vinylRecord.classList.add("is-playing");
+    }).catch((err) => {
+      console.log("Audio play blocked or waiting:", err);
+    });
+  }
+
+  function pauseAudio() {
+    bgMusic.pause();
+    vinylRecord.classList.remove("is-playing");
+  }
+
+  // Auto-advance to next track when current one finishes
+  bgMusic.addEventListener("ended", function () {
+    currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+    loadTrack(currentTrackIndex);
+    playAudio();
+  });
+
+  // 1. Initial click/tap anywhere on page (Logo Reveal entry)
+  function handleInitialEntry() {
+    if (hasStartedSequence) return;
+    hasStartedSequence = true;
+
+    loadTrack(getRandomTrackIndex());
+
+    // 10-second delay for the Logo-Reveal.mp4 audio
+    delayTimer = setTimeout(() => {
+      playAudio();
+    }, 10000);
+
+    document.removeEventListener("click", handleInitialEntry);
+    document.removeEventListener("touchstart", handleInitialEntry);
+  }
+
+  document.addEventListener("click", handleInitialEntry);
+  document.addEventListener("touchstart", handleInitialEntry);
+
+  // 2. Spinning Vinyl Play/Pause toggle button
+  vinylBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+
+    if (bgMusic.paused) {
+      userWantsMusic = true;
+      if (delayTimer) clearTimeout(delayTimer);
+      if (!bgMusic.src) loadTrack(getRandomTrackIndex());
+      playAudio();
+    } else {
+      userWantsMusic = false;
+      if (delayTimer) clearTimeout(delayTimer);
+      pauseAudio();
+    }
+  });
+
+  // 3. Automatically pause background music when any video plays
+  siteVideos.forEach((video) => {
+    video.addEventListener("play", function () {
+      if (!bgMusic.paused) {
+        pauseAudio();
+      }
+    });
+
+    video.addEventListener("pause", function () {
+      if (userWantsMusic && !video.seeking && hasStartedSequence) {
+        playAudio();
+      }
+    });
+
+    video.addEventListener("ended", function () {
+      if (userWantsMusic && hasStartedSequence) {
+        playAudio();
+      }
+    });
+  });
+});
+
 </script>
 </body>
 </html>
