@@ -837,6 +837,99 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
   animation: spinVinyl 3s linear infinite;
 }
 
+/* ============ HASHTAG TOOLTIP STYLING ============ */
+.hashtag-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.info-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  outline: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.info-btn:hover {
+  transform: scale(1.08);
+  background: var(--accent-soft);
+}
+
+.info-icon {
+  font-size: 11px;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1;
+}
+
+.tooltip-card {
+  visibility: hidden;
+  opacity: 0;
+  width: 270px;
+  background-color: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  border-radius: 8px;
+  padding: 14px;
+  position: absolute;
+  z-index: 1050;
+  bottom: 140%;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--line);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+  pointer-events: none;
+}
+
+.tooltip-card::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--paper) transparent transparent transparent;
+}
+
+.tooltip-card strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: var(--accent);
+}
+
+.tooltip-card p {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.info-btn:hover .tooltip-card,
+.info-btn:focus .tooltip-card,
+.info-btn.active .tooltip-card {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 
 </style>
 </head>
@@ -1073,7 +1166,17 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
     <h2 style="font-size:clamp(26px,4vw,36px); margin:12px 0 0;">Snap it &amp; tag it</h2>
     <p style="max-width:560px; margin:16px auto 0; font-size:16px;">We will always love to see your POV of our wonderful day, so share it using means convenient to you or tag us on your social media.</p>
     
-    <div class="hashtag" style="margin-top:32px;">Use #ABHOriginal to celebrate 'Our Voyage'</div>
+    <div class="hashtag-container" style="margin-top:32px;">
+      <span>Use <strong>#ABHOriginal</strong> to celebrate 'Our Voyage'</span>
+      <button type="button" class="info-btn" aria-label="About #ABHOriginal">
+        <span class="info-icon">i</span>
+        <span class="tooltip-card">
+          <strong>#ABHOriginal</strong>
+          <p>Beyond a monogram, <strong>#ABHOriginal</strong> represents <em>Abhijeet's</em> &amp; <em>Honey's</em> distinct journeys becoming one and the quiet beginning of their own little tribe.</p>
+        </span>
+      </button>
+    </div>
+
     <div class="socials" style="margin-top: 32px;">
       <a href="https://instagram.com/honeymariamjacob" target="_blank" rel="noopener">@honeymariamjacob</a>
       <!-- Centered Instagram Icon Divider -->
@@ -1656,6 +1759,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+
+
+/* ============ Hashtag Popup ============ */
+document.addEventListener("DOMContentLoaded", function () {
+  const infoBtn = document.querySelector(".info-btn");
+
+  if (infoBtn) {
+    infoBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      this.classList.toggle("active");
+    });
+
+    // Close popup if tapping anywhere else on the screen
+    document.addEventListener("click", function () {
+      infoBtn.classList.remove("active");
+    });
+  }
+});
+
+
 
 </script>
 </body>
