@@ -13,7 +13,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,450;0,9..144,600;1,9..144,450&family=Allura&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Libraries for PDF Generation and QR Code Creation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
+
 
 /* ============ HERO BOAT WATERMARK (EXPANDED SPAN & VISIBILITY) ============ */
 .hero-boat-watermark {
@@ -688,6 +692,317 @@ nav.scrolled{ border-bottom-color:var(--line); }
   100%{ transform:scale(1) rotate(-6deg); }
 }
 
+
+/* ============ RSVP CONFIRMATION & CALENDAR BUTTONS ============ */
+.confirmation-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  margin-top: 20px;
+}
+
+.confirmation-card h3 {
+  font-family: var(--serif);
+  font-size: 26px;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+
+.confirmation-card p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+.action-buttons-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 380px;
+  margin: 20px auto 0;
+}
+
+.btn-pass-download {
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-pass-download:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.btn-cal {
+  background: #ffffff;
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-cal:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--paper-2);
+}
+
+/* Hidden Boarding Pass HTML Container (Rendered to PDF behind the scenes) */
+#boardingPassTemplate {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  width: 750px;
+  background: #faf9f6;
+  border: 2px solid #6d1b24;
+  border-radius: 10px;
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+  color: #2f241d;
+  box-sizing: border-box;
+}
+
+.bp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px dashed #6d1b24;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.bp-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  color: #6d1b24;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bp-passenger {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.bp-passenger strong {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  color: #6d1b24;
+}
+
+.bp-events-grid {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.bp-event-card {
+  background: #f2f0ea;
+  border-left: 4px solid #6d1b24;
+  padding: 10px 14px;
+  border-radius: 4px;
+}
+
+.bp-event-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #6d1b24;
+}
+
+.bp-event-detail {
+  font-size: 12px;
+  color: #5c5142;
+  margin-top: 2px;
+}
+
+.bp-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e2ded3;
+  padding-top: 12px;
+  font-size: 11px;
+  color: #5c5142;
+}
+
+
+/* ============ ON-SCREEN BOARDING PASS CARD ============ */
+.boarding-pass-card {
+  max-width: 640px;
+  margin: 24px auto 0;
+  background: var(--paper);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.bp-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px dashed var(--patna-gold);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.bp-card-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.bp-card-title {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 2px 0 0;
+}
+
+.bp-card-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.bp-passenger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background: var(--paper-2);
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--accent);
+}
+
+.bp-passenger-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.bp-passenger-name {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.bp-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blr-navy);
+  letter-spacing: 0.05em;
+}
+
+.bp-events-grid {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.bp-item {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--patna-gold);
+  padding: 12px 16px;
+  border-radius: 6px;
+}
+
+.bp-item-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.bp-item-detail {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+
+.bp-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ============ NATIVE PRINT STYLES ============ */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+@media print {
+  /* Hide standard page UI */
+  #logoRevealScreen, nav, section:not(.rsvp), footer, #vinyl-btn, .scroll-progress, .action-buttons-group, .confirmation-card > p, .confirmation-card > h3 {
+    display: none !important;
+  }
+
+  body, .rsvp, .rsvp-inner, .confirmation-card {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Isolate Boarding Pass on single sheet */
+  #printablePass {
+    display: block !important;
+    width: 100% !important;
+    max-width: 620px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    border: 2px solid #6d1b24 !important;
+    background: #faf9f6 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+
 /* ============ FAREWELL ("the journey continues") ============ */
 .farewell{
   position:relative; overflow:hidden;
@@ -1263,9 +1578,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
 
       <!-- Step 2B: Decline Branch (Hidden initially) -->
       <div id="decliningFields" style="display: none; margin-top: 24px;">
-        <p style="text-align:center; color:var(--ink-soft); font-size:15px; margin-bottom:20px;">
-          We are so sorry we won't get to see you at the celebrations! We'd still love to hear from you.
-        </p>
+        
         <div class="field">
           <label>Send your wishes / message for the couple</label>
           <textarea name="wishes" placeholder="Share your warm thoughts or blessings..."></textarea>
@@ -1284,6 +1597,43 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
   </div>
 </section>
+
+<!-- Visible Boarding Pass Card Template -->
+<div id="boardingPassTemplate" style="max-width: 680px; margin: 20px auto 0; background: #faf9f6; border: 2px solid #6d1b24; border-radius: 12px; padding: 24px; font-family: 'Inter', sans-serif; color: #2f241d; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: left; box-sizing: border-box;">
+  
+  <!-- Top Header with Seal -->
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #c8a13c; padding-bottom: 14px; margin-bottom: 18px;">
+    <div>
+      <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6d1b24; font-weight: 700;">Official Event Pass</div>
+      <div style="font-family: 'Fraunces', serif; font-size: 24px; color: #6d1b24; font-weight: 600; margin-top: 2px;">AHOY! BOARDING PASS</div>
+      <div style="font-size: 11px; color: #5c5142; letter-spacing: 0.05em; margin-top: 2px;">HONEY &amp; ABHIJEET'S WEDDING VOYAGE · #ABHORIGINAL</div>
+    </div>
+    <img src="seal-72.png" width="56" height="56" alt="Seal" style="filter: drop-shadow(0 4px 8px rgba(67,16,22,0.2)); flex-shrink: 0;">
+  </div>
+
+  <!-- Passenger & Status Row -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; background: #f2f0ea; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #6d1b24;">
+    <div>
+      <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #5c5142; font-weight: 600;">Passenger Name</div>
+      <div id="pdfGuestName" style="font-family: 'Fraunces', serif; font-size: 22px; color: #6d1b24; font-weight: 600; margin-top: 2px;">Guest Name</div>
+    </div>
+    <div style="text-align: right;">
+      <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #5c5142;">Status</div>
+      <div style="font-size: 12px; font-weight: 700; color: #134a52; letter-spacing: 0.05em;">CONFIRMED PASS</div>
+    </div>
+  </div>
+
+  <!-- Events List Grid -->
+  <div id="pdfEventsList" style="display: grid; gap: 14px; margin-bottom: 20px;">
+    <!-- Dynamically Populated via JS -->
+  </div>
+
+  <!-- Footer Tagline -->
+  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2ded3; padding-top: 14px; font-size: 12px; color: #5c5142;">
+    <span style="font-style: italic; font-family: 'Fraunces', serif;">Boatmates, now and always.</span>
+    <span style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #6d1b24;">AHOY-BY-HA.COM</span>
+  </div>
+</div>
 
 <section class="farewell" id="farewell">
   <div class="ripple-layer" id="rippleLayer"></div>
@@ -1364,11 +1714,184 @@ function setupPillGroups() {
 setupPillGroups();
 
 
-/* ============ GOOGLE FORMS RSVP SUBMIT ============ */
+/* ============ EVENT DATA CONFIG ============ */
+const EVENT_DETAILS = {
+  event1: {
+    title: "Haldi, Mehndi & Sangeet — Patna",
+    start: "20261124T053000Z",
+    end: "20261124T163000Z",
+    dateText: "24 Nov 2026 · From late morning through the evening",
+    venue: "Le Grande Hotel & Banquet, Patna",
+    dress: "Haldi — something yellow · Mehndi & Sangeet — party wear",
+    mapUrl: "https://maps.app.goo.gl/FxQsiwVT7uzBGMp38"
+  },
+  event2: {
+    title: "Wedding Ceremony — Patna",
+    start: "20261125T133000Z",
+    end: "20261125T180000Z",
+    dateText: "25 Nov 2026 · From 7:00 PM onwards",
+    venue: "T Point Resort, Patna",
+    dress: "Indian formals",
+    mapUrl: "https://maps.app.goo.gl/ADqSacNZ8TixRpyK8"
+  },
+  event3: {
+    title: "Wedding & Reception — Bengaluru",
+    start: "20261212T053000Z",
+    end: "20261212T123000Z",
+    dateText: "12 Dec 2026 · 11:00 AM – 6:00 PM",
+    venue: "St. Mark's Cathedral & Tranquil Woods By Jade, Bengaluru",
+    dress: "Western formals",
+    mapUrl: "https://maps.app.goo.gl/5CEsJptFRQiTywqm9"
+  }
+};
+
+/* Matches user pill selections to event objects */
+function getEventDataArray(selectedEvents) {
+  const events = [];
+  if (!selectedEvents || selectedEvents.length === 0) {
+    return [EVENT_DETAILS.event1, EVENT_DETAILS.event2, EVENT_DETAILS.event3];
+  }
+  
+  selectedEvents.forEach(evtStr => {
+    if (evtStr.includes('Haldi') || evtStr.includes('Patna, 24 Nov')) events.push(EVENT_DETAILS.event1);
+    if (evtStr.includes('Ceremony') || evtStr.includes('Patna, 25 Nov')) events.push(EVENT_DETAILS.event2);
+    if (evtStr.includes('Bengaluru') || evtStr.includes('12 Dec')) events.push(EVENT_DETAILS.event3);
+  });
+
+  return events.length ? events : [EVENT_DETAILS.event1, EVENT_DETAILS.event2, EVENT_DETAILS.event3];
+}
+
+/* ============ ISOLATED PRINT ENGINE ============ */
+function printBoardingPass() {
+  const passElement = document.getElementById('printablePass');
+  if (!passElement) {
+    alert("Boarding pass element not found. Please submit your RSVP first.");
+    return;
+  }
+
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
+  if (!printWindow) {
+    window.print();
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Ahoy Boarding Pass</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+          @page { size: 210mm 148mm; margin: 0; }
+          html, body { width: 210mm; height: 148mm; margin: 0; padding: 0; background: #faf9f6; font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .boarding-pass-card { width: 210mm; height: 148mm; padding: 12mm 14mm; box-sizing: border-box; background: #faf9f6; border: 2px solid #6d1b24; }
+          .bp-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #c8a13c; padding-bottom: 10px; margin-bottom: 12px; }
+          .bp-card-eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6d1b24; font-weight: 700; }
+          .bp-card-title { font-family: 'Fraunces', Georgia, serif; font-size: 20px; color: #6d1b24; font-weight: 600; margin: 2px 0 0; }
+          .bp-card-sub { font-size: 10px; color: #5c5142; letter-spacing: 0.05em; margin-top: 2px; }
+          .bp-passenger-row { display: flex; justify-content: space-between; align-items: flex-end; background: #f2f0ea; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; border-left: 4px solid #6d1b24; }
+          .bp-passenger-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #5c5142; font-weight: 600; }
+          .bp-passenger-name { font-family: 'Fraunces', Georgia, serif; font-size: 18px; color: #6d1b24; font-weight: 600; margin-top: 2px; }
+          .bp-status-badge { font-size: 10px; font-weight: 700; color: #134a52; letter-spacing: 0.05em; }
+          .bp-events-grid { display: grid; gap: 8px; margin-bottom: 12px; }
+          .bp-item { background: #ffffff; border: 1px solid #e2ded3; border-left: 4px solid #c8a13c; padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+          .bp-item-title { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 14px; color: #6d1b24; }
+          .bp-item-detail { font-size: 11px; color: #5c5142; margin-top: 2px; }
+          .bp-card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2ded3; padding-top: 8px; font-size: 10px; color: #5c5142; }
+        </style>
+      </head>
+      <body>
+        <div class="boarding-pass-card">
+          ${passElement.innerHTML}
+        </div>
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 400);
+}
+
+/* ============ SAVE PASS AS IMAGE ENGINE ============ */
+function downloadPassImage(guestName) {
+  const passElement = document.getElementById('printablePass');
+  if (!passElement) {
+    alert("Boarding pass card not found. Please submit your RSVP first.");
+    return;
+  }
+
+  if (typeof html2canvas === 'undefined') {
+    alert("Image generator library is still loading. Please try again in a few seconds.");
+    return;
+  }
+
+  const cleanName = (guestName && typeof guestName === 'string') 
+    ? guestName.replace(/[^a-zA-Z0-9]/g, '_') 
+    : 'Guest';
+
+  // Configure html2canvas to safely bypass CORS and CSS variable rendering issues
+  html2canvas(passElement, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    logging: false,
+    backgroundColor: "#faf9f6",
+    onclone: (clonedDoc) => {
+      // Ensure the cloned element inside html2canvas is explicitly visible & explicitly styled
+      const clonedPass = clonedDoc.getElementById('printablePass');
+      if (clonedPass) {
+        clonedPass.style.display = 'block';
+        clonedPass.style.transform = 'none';
+      }
+    }
+  }).then(canvas => {
+    const imageUri = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `Ahoy_Boarding_Pass_${cleanName}.png`;
+    link.href = imageUri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }).catch(err => {
+    console.error("Error saving pass image:", err);
+    
+    // Fallback Blob Download if dataURL fails
+    try {
+      html2canvas(passElement, { scale: 1.5, useCORS: true }).then(canvas => {
+        canvas.toBlob((blob) => {
+          if (!blob) throw new Error("Blob generation failed");
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `Ahoy_Boarding_Pass_${cleanName}.png`;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        });
+      });
+    } catch(fallbackErr) {
+      alert("Could not generate image automatically. You can use the 'Save / Print PDF' option instead.");
+    }
+  });
+}
+
+
+
+/* ============ RSVP SUBMISSION WITH QR CODES & PRINT CONTROLLER ============ */
 const rsvpForm = document.getElementById('rsvpForm');
 if (rsvpForm) {
   rsvpForm.addEventListener('submit', function(e) {
     e.preventDefault();
+
+    const guestName = rsvpForm.name.value.trim() || "Dear Guest";
 
     const selectedValues = (name) => {
       const group = rsvpForm.querySelector('.pill-group[data-name="' + name + '"]');
@@ -1377,31 +1900,26 @@ if (rsvpForm) {
     };
 
     const payload = new FormData();
+    payload.append(CONFIG.rsvp.entries.name, guestName);
 
-    // 1. Name
-    payload.append(CONFIG.rsvp.entries.name, rsvpForm.name.value);
-
-    // 2. Attendance
     const attendanceChoice = selectedValues('attendance')[0] || (isAttending ? 'Yes, with pleasure!' : 'Regretfully, no');
     payload.append(CONFIG.rsvp.entries.attendance, attendanceChoice);
+
+    const selectedEvents = selectedValues('events');
 
     if (isAttending) {
       if (rsvpForm.email && rsvpForm.email.value) payload.append(CONFIG.rsvp.entries.email, rsvpForm.email.value);
       if (rsvpForm.phone && rsvpForm.phone.value) payload.append(CONFIG.rsvp.entries.phone, rsvpForm.phone.value);
-
-      const events = selectedValues('events');
-      events.forEach(v => payload.append(CONFIG.rsvp.entries.events, v));
-
+      selectedEvents.forEach(v => payload.append(CONFIG.rsvp.entries.events, v));
       const guestChoice = selectedValues('guest')[0] || 'No';
       payload.append(CONFIG.rsvp.entries.guest, guestChoice);
-
       if (rsvpForm.message && rsvpForm.message.value) payload.append(CONFIG.rsvp.entries.message, rsvpForm.message.value);
     } else {
       const wishesText = rsvpForm.wishes ? rsvpForm.wishes.value : 'Sent regrets';
       payload.append(CONFIG.rsvp.entries.wishes, wishesText);
     }
 
-    // Submit via hidden iframe to bypass CORS
+    // Submit via hidden iframe
     const tempForm = document.createElement('form');
     tempForm.action = CONFIG.rsvp.actionUrl;
     tempForm.method = 'POST';
@@ -1419,7 +1937,6 @@ if (rsvpForm) {
     tempForm.submit();
     document.body.removeChild(tempForm);
 
-    // UI Response
     rsvpForm.style.display = 'none';
     const overlay = document.getElementById('rsvpSealOverlay');
     if (overlay) overlay.classList.add('show');
@@ -1431,18 +1948,108 @@ if (rsvpForm) {
 
     setTimeout(() => {
       if (overlay) overlay.classList.remove('show');
+
+      const rsvpThanks = document.getElementById('rsvpThanks');
+      
       if (isAttending) {
-        document.getElementById('thanksTitle').textContent = "Thank you!";
-        document.getElementById('thanksSub').textContent = "We've got your RSVP — see you on the dance floor!";
+        const matchedEvents = getEventDataArray(selectedEvents);
+
+        // Build HTML with dedicated containers for QR codes
+        let eventsHtml = '';
+        matchedEvents.forEach((evt, idx) => {
+          eventsHtml += `
+            <div class="bp-item" style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <div style="flex: 1;">
+                <div class="bp-item-title">${evt.title}</div>
+                <div class="bp-item-detail">📍 <strong>Venue:</strong> ${evt.venue}</div>
+                <div class="bp-item-detail">⏰ <strong>Timing:</strong> ${evt.dateText}</div>
+                <div class="bp-item-detail" style="font-style: italic; color: var(--accent); margin-top: 3px;"><strong>Dress Code:</strong> ${evt.dress}</div>
+              </div>
+              <div style="text-align: center; min-width: 68px;">
+                <div id="qrcode-${idx}" style="padding: 4px; background: #ffffff; border: 1px solid var(--line); border-radius: 4px; display: inline-block;"></div>
+                <div style="font-size: 8.5px; color: var(--ink-soft); margin-top: 2px; font-weight: 600; text-transform: uppercase;">Scan Map</div>
+              </div>
+            </div>
+          `;
+        });
+
+        rsvpThanks.innerHTML = `
+          <div class="confirmation-card">
+            <h3>Welcome Aboard, ${guestName}!</h3>
+            <p>We've received your RSVP — see you on the dance floor! You can save/print your official Boarding Pass or save as an image below.</p>
+
+            <div class="boarding-pass-card" id="printablePass">
+              <div class="bp-card-header">
+                <div>
+                  <div class="bp-card-eyebrow">Official Event Pass</div>
+                  <div class="bp-card-title">AHOY! BOARDING PASS</div>
+                  <div class="bp-card-sub">HONEY &amp; ABHIJEET'S WEDDING VOYAGE · #ABHORIGINAL</div>
+                </div>
+                <img src="seal-72.png" width="52" height="52" alt="Seal">
+              </div>
+
+              <div class="bp-passenger-row">
+                <div>
+                  <div class="bp-passenger-label">Passenger Name</div>
+                  <div class="bp-passenger-name">${guestName.toUpperCase()}</div>
+                </div>
+                <div>
+                  <div class="bp-status-badge">STATUS: CONFIRMED PASS</div>
+                </div>
+              </div>
+
+              <div class="bp-events-grid">
+                ${eventsHtml}
+              </div>
+
+              <div class="bp-card-footer">
+                <span style="font-style: italic; font-family: var(--serif);">Boatmates, now and always.</span>
+                <span style="font-size: 11px; font-weight: 600; color: var(--accent);">AHOY-BY-HA.COM</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons-group">
+              <button class="btn-pass-download" onclick="printBoardingPass()">
+                🖨️ Save / Print PDF
+              </button>
+              <button class="btn-cal" onclick="downloadPassImage('${guestName.replace(/'/g, "\\'")}')">
+                🖼️ Save as Image (.PNG)
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Render QR Codes into each event card
+        matchedEvents.forEach((evt, idx) => {
+          const qrContainer = document.getElementById(`qrcode-${idx}`);
+          if (qrContainer && typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+              text: evt.mapUrl,
+              width: 58,
+              height: 58,
+              colorDark: "#6d1b24",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.M
+            });
+          }
+        });
+
+        
       } else {
-        document.getElementById('thanksTitle').textContent = "Thank you for your wishes!";
-        document.getElementById('thanksSub').textContent = "We will miss you at the celebrations, but your warm thoughts mean the world to us.";
+        rsvpThanks.innerHTML = `
+          <div class="confirmation-card">
+            <h3>Dear ${guestName},</h3>
+            <p>We are so sorry we won't get to see you at the celebrations! We will truly miss having you with us, but your warm thoughts and wishes mean the world to us.</p>
+            <p style="font-family: var(--script); font-size: 28px; color: var(--accent); margin-top: 15px;">— Honey &amp; Abhijeet</p>
+          </div>
+        `;
       }
-      document.getElementById('rsvpThanks').style.display = 'block';
+
+      rsvpThanks.style.display = 'block';
     }, 750);
   });
 }
-
 
 /* ============ NAV shadow + scroll progress ============ */
 const navEl = document.getElementById('mainNav');
