@@ -2011,18 +2011,12 @@ if (rsvpForm) {
           </div>
         `;
 
-        // Render QR Codes into each event card
+        // Render QR Codes as standard, cross-origin safe <img> tags
         matchedEvents.forEach((evt, idx) => {
           const qrContainer = document.getElementById(`qrcode-${idx}`);
-          if (qrContainer && typeof QRCode !== 'undefined') {
-            new QRCode(qrContainer, {
-              text: evt.mapUrl,
-              width: 58,
-              height: 58,
-              colorDark: "#6d1b24",
-              colorLight: "#ffffff",
-              correctLevel: QRCode.CorrectLevel.M
-            });
+          if (qrContainer) {
+            const encodedUrl = encodeURIComponent(evt.mapUrl);
+            qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedUrl}&color=6d1b24&bgcolor=ffffff" style="width: 58px; height: 58px; display: block;" crossOrigin="anonymous" alt="Map QR">`;
           }
         });
 
