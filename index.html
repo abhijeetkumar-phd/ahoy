@@ -694,6 +694,20 @@ nav.scrolled{ border-bottom-color:var(--line); }
   background:linear-gradient(180deg,var(--blr-navy-deep),#081f24);
   color:#eaf3f2; text-align:center; padding:150px 24px;
 }
+/* Wax Seal Placement */
+.farewell-seal {
+  width: 112px;
+  height: 112px;
+  margin: 24px auto 0;
+  display: block;
+  opacity: 0.9;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+  transition: transform 0.4s ease;
+}
+
+.farewell-seal:hover {
+  transform: scale(1.08) rotate(8deg);
+}
 .ripple-layer{
   position:absolute; inset:0; pointer-events:none;
   background:radial-gradient(circle 260px at var(--mx,50%) var(--my,50%), rgba(200,161,60,.16), transparent 70%);
@@ -1278,6 +1292,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
     <p class="farewell-sub">Thank you for becoming part of our journey.</p>
     <div class="farewell-sign"><span>Honey</span> <em>&amp;</em> <span>Abhijeet</span></div>
     <div class="farewell-tag">Boatmates, now and always.</div>
+    <img src="logo.png" alt="H&amp;A Seal" class="farewell-seal">
   </div>
 </section>
 
