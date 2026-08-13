@@ -1830,11 +1830,6 @@ function downloadPassImage(guestName) {
     return;
   }
 
-  if (typeof html2canvas === 'undefined') {
-    alert("Image generator library is still loading. Please try again in a few seconds.");
-    return;
-  }
-
   const cleanName = (guestName && typeof guestName === 'string') 
     ? guestName.replace(/[^a-zA-Z0-9]/g, '_') 
     : 'Guest';
@@ -1842,7 +1837,6 @@ function downloadPassImage(guestName) {
   html2canvas(passElement, {
     scale: 2,
     useCORS: true,
-    allowTaint: true,
     backgroundColor: "#faf9f6"
   }).then(canvas => {
     const link = document.createElement('a');
@@ -1853,7 +1847,7 @@ function downloadPassImage(guestName) {
     document.body.removeChild(link);
   }).catch(err => {
     console.error("Error saving pass image:", err);
-    alert("Could not generate image automatically. You can use the 'Save / Print PDF' option instead.");
+    alert("Could not save image automatically.");
   });
 }
 
@@ -1994,13 +1988,15 @@ if (rsvpForm) {
           </div>
         `;
 
-        // Render QR Codes synchronously into Base64 Data URI Image tags
+        // Render QR Codes into Base64 images immediately after submission
         matchedEvents.forEach((evt, idx) => {
           const qrContainer = document.getElementById(`qrcode-${idx}`);
-          if (qrContainer) {
-            qrContainer.innerHTML = ''; // Clear container
-            const tempDiv = document.createElement('div');
+          if (qrContainer && typeof QRCode !== 'undefined') {
+            // 1. Clear container
+            qrContainer.innerHTML = '';
             
+            // 2. Create temporary element to hold qrcode.js output
+            const tempDiv = document.createElement('div');
             new QRCode(tempDiv, {
               text: evt.mapUrl,
               width: 120,
@@ -2010,12 +2006,12 @@ if (rsvpForm) {
               correctLevel: QRCode.CorrectLevel.M
             });
 
-            // Wait 50ms for QRCode library to paint canvas, then convert to static img
+            // 3. Convert generated canvas to static PNG image immediately
             setTimeout(() => {
               const canvas = tempDiv.querySelector('canvas');
               if (canvas) {
-                const dataUrl = canvas.toDataURL('image/png');
-                qrContainer.innerHTML = `<img src="${dataUrl}" style="width: 58px; height: 58px; display: block;" alt="Map QR">`;
+                const imgData = canvas.toDataURL('image/png');
+                qrContainer.innerHTML = `<img src="${imgData}" style="width: 58px; height: 58px; display: block;" alt="Map QR">`;
               }
             }, 50);
           }
