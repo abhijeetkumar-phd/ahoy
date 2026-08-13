@@ -1800,24 +1800,27 @@ function printBoardingPass() {
           .bp-item-title { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 14px; color: #6d1b24; }
           .bp-item-detail { font-size: 11px; color: #5c5142; margin-top: 2px; }
           .bp-card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2ded3; padding-top: 8px; font-size: 10px; color: #5c5142; }
+          img { max-width: 100%; height: auto; }
         </style>
       </head>
       <body>
         <div class="boarding-pass-card">
           ${passElement.innerHTML}
         </div>
+        <script>
+          window.onload = function() {
+            window.print();
+          };
+        <\/script>
       </body>
     </html>
   `);
 
   printWindow.document.close();
   printWindow.focus();
-
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 400);
 }
+
+
 
 /* ============ SAVE PASS AS IMAGE ENGINE ============ */
 function downloadPassImage(guestName) {
@@ -1832,24 +1835,6 @@ function downloadPassImage(guestName) {
     return;
   }
 
-  // Ensure QR codes are rendered as visible img elements before snapshot
-  const qrContainers = passElement.querySelectorAll('[id^="qrcode-"]');
-  qrContainers.forEach(container => {
-    const cvs = container.querySelector('canvas');
-    if (cvs) {
-      let img = container.querySelector('img');
-      if (!img) {
-        img = document.createElement('img');
-        container.appendChild(img);
-      }
-      img.src = cvs.toDataURL('image/png');
-      img.style.display = 'block';
-      img.style.width = '58px';
-      img.style.height = '58px';
-      cvs.style.display = 'none'; // Keep canvas hidden after extracting data
-    }
-  });
-
   const cleanName = (guestName && typeof guestName === 'string') 
     ? guestName.replace(/[^a-zA-Z0-9]/g, '_') 
     : 'Guest';
@@ -1858,13 +1843,11 @@ function downloadPassImage(guestName) {
     scale: 2,
     useCORS: true,
     allowTaint: true,
-    logging: false,
     backgroundColor: "#faf9f6"
   }).then(canvas => {
-    const imageUri = canvas.toDataURL('image/png');
     const link = document.createElement('a');
     link.download = `Ahoy_Boarding_Pass_${cleanName}.png`;
-    link.href = imageUri;
+    link.href = canvas.toDataURL('image/png');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -2011,12 +1994,30 @@ if (rsvpForm) {
           </div>
         `;
 
-        // Render QR Codes as standard, cross-origin safe <img> tags
+        // Render QR Codes synchronously into Base64 Data URI Image tags
         matchedEvents.forEach((evt, idx) => {
           const qrContainer = document.getElementById(`qrcode-${idx}`);
           if (qrContainer) {
-            const encodedUrl = encodeURIComponent(evt.mapUrl);
-            qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedUrl}&color=6d1b24&bgcolor=ffffff" style="width: 58px; height: 58px; display: block;" crossOrigin="anonymous" alt="Map QR">`;
+            qrContainer.innerHTML = ''; // Clear container
+            const tempDiv = document.createElement('div');
+            
+            new QRCode(tempDiv, {
+              text: evt.mapUrl,
+              width: 120,
+              height: 120,
+              colorDark: "#6d1b24",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.M
+            });
+
+            // Wait 50ms for QRCode library to paint canvas, then convert to static img
+            setTimeout(() => {
+              const canvas = tempDiv.querySelector('canvas');
+              if (canvas) {
+                const dataUrl = canvas.toDataURL('image/png');
+                qrContainer.innerHTML = `<img src="${dataUrl}" style="width: 58px; height: 58px; display: block;" alt="Map QR">`;
+              }
+            }, 50);
           }
         });
 
