@@ -42,6 +42,7 @@
   }
 }
 
+
 /* ============ WATERMARK SIDE BORDERS ============ */
 body::before,
 body::after {
@@ -49,13 +50,13 @@ body::after {
   position: fixed;
   top: 0;
   bottom: 0;
-  width: 320px; /* Expanded for a rich, noticeable frame on desktop */
-  z-index: 1; /* Keeps borders behind text content but visible on background */
-  pointer-events: none; /* Ensures buttons and links behind remain clickable */
-  opacity: 0.18; /* Increased transparency so line details are clear */
+  width: 320px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.18;
   background-repeat: repeat-y;
   background-size: contain;
-  mix-blend-mode: multiply; /* Blends artwork naturally over different section background colors */
+  mix-blend-mode: multiply;
 }
 
 /* Left side border (Bihar motifs) */
@@ -72,7 +73,7 @@ body::after {
   background-position: right top;
 }
 
-/* Tablet & Mobile Scaling */
+/* Mobile & Tablet Specific Scaling */
 @media (max-width: 900px) {
   body::before,
   body::after {
@@ -80,14 +81,16 @@ body::after {
     opacity: 0.18;
   }
 }
+
 @media (max-width: 600px) {
   body::before,
   body::after {
     display: block;
-    width: 65px;       /* Expanded width for visible framing on mobile screens */
-    opacity: 0.18;     /* Enhanced visibility while keeping text readable */
+    width: clamp(45px, 13vw, 68px);
+    opacity: 0.18;
   }
 }
+
 
 /* ============ TOKENS ============ */
 @property --accent {
@@ -155,7 +158,10 @@ a{ color:inherit; }
 }
 section{ position:relative; }
 .section-pad{ padding:120px 0; }
-@media (max-width:640px){ .section-pad{ padding:72px 0; } .wrap{padding:0 20px;} }
+@media (max-width:640px){ 
+  .section-pad{ padding:72px 0; } 
+  .wrap{ padding:0 clamp(50px, 15vw, 75px); } 
+}
 
 /* reveal-on-scroll */
 .reveal{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s ease; }
@@ -1337,14 +1343,14 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
     <div class="couple-grid">
       <div class="couple-card reveal">
         <h3>Meet the Bride</h3>
-        <img src="honey.jpg" alt="Honey" style="width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:6px; margin-bottom:22px;">
-        <p class="couple-name" style="font-family: var(--script); font-size: 64px !important; color: var(--ink) !important; margin: 12px 0 6px !important; line-height: 1 !important;">Honey</p>
+        <img src="honey.jpg" alt="Honey Mariam Jacob" style="width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:6px; margin-bottom:22px;">
+        <p class="couple-name" style="font-family: var(--script); font-size: clamp(34px, 3.2vw, 44px) !important; white-space: nowrap; color: var(--ink) !important; margin: 12px 0 6px !important; line-height: 1.1 !important;">Honey Mariam Jacob</p>
 	        <p>Honey continues to thrive in the demanding world of corporate law, approaching every challenge with determination and independence. Away from work, she finds joy in art, music, and the impossible task of window shopping without being tempted. Those closest to her admire her resilience, warmth, and ability to stand her ground while standing by the people she loves. She has been Abhijeet's classmate and confidante for sixteen years, proving that the strongest partnerships are often built long before they are recognised.</p>
       </div>
       <div class="couple-card reveal">
         <h3>Meet the Groom</h3>
-        <img src="abhijeet.jpg" alt="Abhijeet" style="width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:6px; margin-bottom:22px;">
-        <p class="couple-name" style="font-family: var(--script); font-size: 64px !important; color: var(--ink) !important; margin: 12px 0 6px !important; line-height: 1 !important;">Abhijeet</p>
+        <img src="abhijeet.jpg" alt="Dr Abhijeet Kumar" style="width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:6px; margin-bottom:22px;">
+        <p class="couple-name" style="font-family: var(--script); font-size: clamp(34px, 3.2vw, 44px) !important; white-space: nowrap; color: var(--ink) !important; margin: 12px 0 6px !important; line-height: 1.1 !important;">Dr Abhijeet Kumar</p>
 	        <p>Abhijeet traded legal practice for the classroom, finding his calling as an academic after beginning his career as a lawyer. He is happiest when travelling with a camera in hand, always searching for the next landscape, street, or fleeting moment worth capturing. Never one to stay comfortable for too long, routine has never been his strongest suit. Family and friends know him as someone they can rely on. To Honey, he has always been a dependable friend first — that remains the foundation of everything else.</p>
       </div>
     </div>
@@ -1432,7 +1438,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
           </span>
         </li>
         <li><b>Time</b><span>From late morning through the evening</span></li>
-        <li><b>Dress</b><span>Haldi — something yellow · Mehndi &amp; Sangeet — party wear or Indian casuals</span></li>
+        <li><b>Dress</b><span>Haldi — something Yellow · Mehndi &amp; Sangeet — Party wear or Indian casuals</span></li>
       </ul>
       <div class="stamp" id="cd-event1">counting down…</div>
     </div>
