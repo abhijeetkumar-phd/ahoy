@@ -132,6 +132,8 @@ body::after {
 }
 html{
   scroll-behavior:smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
   transition: --accent .9s ease, --accent-deep .9s ease, --accent-soft .9s ease;
 }
 html.phase-blr{
@@ -142,11 +144,13 @@ html.phase-blr{
 *{box-sizing:border-box;}
 body{
   margin:0;
+  max-width: 100vw;
   background:var(--paper);
   color:var(--ink);
   font-family:var(--sans);
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
+  position: relative;
 }
 h1,h2,h3,.serif{ font-family:var(--serif); font-weight:450; letter-spacing:-0.01em; }
 p{ line-height:1.7; color:var(--ink-soft); }
@@ -179,6 +183,13 @@ nav{
   transition:border-color .3s ease;
 }
 nav.scrolled{ border-bottom-color:var(--line); }
+
+@media (max-width: 640px) {
+  nav {
+    padding: 14px 18px;
+    justify-content: flex-start;
+  }
+}
 .nav-mark{ font-family:var(--serif); font-size:20px; letter-spacing:.02em; display:flex; align-items:center; gap:9px; }
 .nav-mark .seal-mini{ width:26px; height:26px; transition:transform .6s ease; }
 .nav-mark:hover .seal-mini{ transform:rotate(18deg) scale(1.08); }
@@ -776,17 +787,7 @@ nav.scrolled{ border-bottom-color:var(--line); }
 
 /* Hidden Boarding Pass HTML Container (Rendered to PDF behind the scenes) */
 #boardingPassTemplate {
-  position: absolute;
-  left: -9999px;
-  top: -9999px;
-  width: 750px;
-  background: #faf9f6;
-  border: 2px solid #6d1b24;
-  border-radius: 10px;
-  padding: 24px;
-  font-family: 'Inter', sans-serif;
-  color: #2f241d;
-  box-sizing: border-box;
+  display: none !important;
 }
 
 .bp-header {
@@ -1460,7 +1461,7 @@ footer p{ color:#8f8a7a; font-size:12px; margin:4px 0; }
           </span>
         </li>
         <li><b>Time</b><span>From 7:00 PM onwards</span></li>
-        <li><b>Dress</b><span>Indian formals</span></li>
+        <li><b>Dress</b><span>Indian and Western formals</span></li>
       </ul>
       <div class="stamp" id="cd-event2">counting down…</div>
     </div>
@@ -1762,7 +1763,7 @@ const EVENT_DETAILS = {
     end: "20261124T163000Z",
     dateText: "24 Nov 2026 · From late morning through the evening",
     venue: "Le Grande Hotel & Banquet, Patna",
-    dress: "Haldi — something yellow · Mehndi & Sangeet — party wear",
+    dress: "Haldi — something Yellow · Mehndi & Sangeet — Party wear",
     mapUrl: "https://maps.app.goo.gl/FxQsiwVT7uzBGMp38"
   },
   event2: {
@@ -1771,7 +1772,7 @@ const EVENT_DETAILS = {
     end: "20261125T180000Z",
     dateText: "25 Nov 2026 · From 7:00 PM onwards",
     venue: "T Point Resort, Patna",
-    dress: "Indian formals",
+    dress: "Indian and Western formals",
     mapUrl: "https://maps.app.goo.gl/ADqSacNZ8TixRpyK8"
   },
   event3: {
@@ -1780,7 +1781,7 @@ const EVENT_DETAILS = {
     end: "20261212T123000Z",
     dateText: "12 Dec 2026 · 11:00 AM – 6:00 PM",
     venue: "St. Mark's Cathedral & Tranquil Woods By Jade, Bengaluru",
-    dress: "Western formals",
+    dress: "Indian and Western formals",
     mapUrl: "https://maps.app.goo.gl/5CEsJptFRQiTywqm9"
   }
 };
